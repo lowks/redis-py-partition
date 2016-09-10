@@ -1,0 +1,7 @@
+redis
+crc16
+## testing
+hypothesis
+pytest
+codecov
+pytest-cov
