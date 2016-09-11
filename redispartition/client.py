@@ -4,17 +4,6 @@ import crc16
 import uuid
 
 
-def logical_AND_reduce(list_of_bools):
-    a = list_of_bools[0]
-    for b in list_of_bools[1:]:
-        a = bytes([a[0] & b[0]])
-    return a
-
-
-def logical_OR_reduce(list_of_bools):
-    return [any(l) for l in zip(*list_of_bools)]
-
-
 class RedisCluster(object):
 
     def __init__(self, connections):
