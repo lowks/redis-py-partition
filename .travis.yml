@@ -11,7 +11,7 @@ services:
 # Install any dependencies for running the tests:
 install: pip install -r requirements.txt
 # command to run tests
-script: py.test --cov=rhd --cov-config .coveragerc rhd/tests/*.py 
+script: py.test --cov=redispartition --cov-config .coveragerc redispartition/tests/*.py 
 after_success:
   codecov
 

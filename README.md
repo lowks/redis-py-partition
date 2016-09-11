@@ -1,6 +1,6 @@
 # Redis-py-partition
 
-Partition data across multiple redis connections. If you're looking  a client for redis cluster see [redis-py-cluster](https://github.com/Grokzen/redis-py-cluster). 
+Partition data across multiple redis connections. If you're looking for a client for redis cluster see [redis-py-cluster](https://github.com/Grokzen/redis-py-cluster). 
 # Install
 
 	pip install redispartition
