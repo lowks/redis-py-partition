@@ -43,6 +43,10 @@ class RedisCluster(object):
         return conn.rpush(k, i)
 
     @pipeiflist
+    def lrange(self, name, start, end, conn=None):
+        return conn.lrange(name, start, end)
+
+    @pipeiflist
     def incr(self, *args, conn=None, **kwargs):
         return conn.incr(*args, **kwargs)
 
@@ -57,6 +61,27 @@ class RedisCluster(object):
     @pipeiflist
     def sismember(self, k, v, conn=None):
         return conn.sismember(k, v)
+
+    @pipeiflist
+    def delete(self, k, conn=None):
+        return conn.delete(k)
+
+    @pipeiflist
+    def bitcount(self, k, conn=None):
+        return conn.bitcount(k)
+
+    @pipeiflist
+    def bitpos(self, k, v, conn=None):
+        return conn.bitpos(k, v)
+
+    @pipeiflist
+    def scard(self, k, conn=None):
+        return conn.scard(k)
+
+    def scan_iter(self, pattern="*"):
+        for conn in self.connections:
+            for k in conn.scan_iter(pattern):
+                yield k
 
     def _bitop(self, operation, dest, *keys, conn=None):
         return conn.bitop(operation, dest, *keys)
@@ -81,8 +106,9 @@ class RedisCluster(object):
         for k, v in zip(hashes, bitarrays):
             c.set(k, v)
         c.bitop(op, '%s%s' % (op, hashes[0]), *hashes)
-        [c.delete(h) for h in hashes]
-        return c.get('%s%s' % (op, hashes[0]))
+        result = c.get('%s%s' % (op, hashes[0]))
+        [c.delete(h) for h in hashes + ['%s%s' % (op, hashes[0])]]
+        return result
 
     def _create_bitop_lists(self, keys):
         bit_op_lists = [[] for _ in range(self.num_conns)]
@@ -94,7 +120,7 @@ class RedisCluster(object):
     def calculate_memory(self):
         return sum(r.info().get('used_memory') for r in self.connections)
 
-    def delete(self):
+    def flushall(self):
         [r.flushall() for r in self.connections]
 
     def shutdown(self):
