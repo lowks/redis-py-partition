@@ -100,3 +100,21 @@ def test_srem_sismember_text(c, v):
     assert rhd.sismember(c, v)
     rhd.srem(c, v)
     rhd.sismember(c, v) is False
+
+
+@given(operation=st.sampled_from(('AND', 'OR', 'XOR')), c=text(min_size=1), c2=text(min_size=1), _bytes1=binary(min_size=1), _bytes2=binary(min_size=1))
+def test_bitoperations(operation, c, c2, _bytes1, _bytes2):
+    rhd = RedisCluster(connections)
+    rhd.delete()
+    rhd.connections[0].set(c+'t', _bytes1)
+    rhd.connections[0].set(c2+'t', _bytes2)
+    rhd.connections[0].bitop(operation, 'tmp', c+'t', c2+'t')
+    res = rhd.connections[0].get('tmp')
+    rhd.delete()
+    if c != c2:
+        rhd.set(c, _bytes1)
+        rhd.set(c2, _bytes2)
+        _res = rhd.bitop(operation, 'tmp', c, c2)
+        assert _res == res
+        # print(rhd.get('tmp'), _res)
+        assert rhd.get('tmp') == res

@@ -1,6 +1,18 @@
 from __future__ import print_function
 from redispartition.decorators import pipeiflist
 import crc16
+import uuid
+
+
+def logical_AND_reduce(list_of_bools):
+    a = list_of_bools[0]
+    for b in list_of_bools[1:]:
+        a = bytes([a[0] & b[0]])
+    return a
+
+
+def logical_OR_reduce(list_of_bools):
+    return [any(l) for l in zip(*list_of_bools)]
 
 
 class RedisCluster(object):
@@ -45,6 +57,39 @@ class RedisCluster(object):
     @pipeiflist
     def sismember(self, k, v, conn=None):
         return conn.sismember(k, v)
+
+    def _bitop(self, operation, dest, *keys, conn=None):
+        return conn.bitop(operation, dest, *keys)
+
+    def bitop(self, operation, dest, *keys):
+        bit_op_lists = self._create_bitop_lists(keys)
+        temporary_bitarrays = []
+        for i, keys in enumerate(bit_op_lists):
+            if keys:
+                self._bitop(
+                    operation, dest, *keys, conn=self.connections[i])
+                res = self.connections[i].get(dest)
+                temporary_bitarrays.append(res)
+        [c.delete(dest) for c in self.connections]
+        result = self.logical_reduce(operation, temporary_bitarrays)
+        self.set(dest, result)
+        return result
+
+    def logical_reduce(self, op, bitarrays):
+        c = self.connections[0]
+        hashes = [str(uuid.uuid4()) for i in bitarrays]
+        for k, v in zip(hashes, bitarrays):
+            c.set(k, v)
+        c.bitop(op, '%s%s' % (op, hashes[0]), *hashes)
+        [c.delete(h) for h in hashes]
+        return c.get('%s%s' % (op, hashes[0]))
+
+    def _create_bitop_lists(self, keys):
+        bit_op_lists = [[] for _ in range(self.num_conns)]
+        for k in keys:
+            i = self.get_connection_index(k)
+            bit_op_lists[i].append(k)
+        return bit_op_lists
 
     def calculate_memory(self):
         return sum(r.info().get('used_memory') for r in self.connections)
