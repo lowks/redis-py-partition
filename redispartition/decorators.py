@@ -5,7 +5,7 @@ from functools import wraps
 def pipeiflist(func):
 
     @wraps(func)
-    def inner(self, *args, **kwargs):
+    def pipeiflist_inner(self, *args, **kwargs):
         if kwargs.get("conn") is None and isinstance(args[0], list):
             pipelines = self._create_pipelines()
             for i in range(len(args[0])):
@@ -26,4 +26,4 @@ def pipeiflist(func):
             kwargs["conn"] = conn
 
             return func(self,  *args, **kwargs)
-    return inner
+    return pipeiflist_inner

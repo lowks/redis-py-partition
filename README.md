@@ -1,6 +1,7 @@
-# Redis-py-partition
-Master : [![Build Status](https://travis-ci.org/Phelimb/redis-py-partition.svg?branch=master)](https://travis-ci.com/Phelimb/redis-py-partition)
+# redis-py-partition
+[![Build Status](https://travis-ci.org/Phelimb/redis-py-partition.svg?branch=master)](https://travis-ci.com/Phelimb/redis-py-partition)
 
+Tested on python 3.4 and 3.5.
 
 Partition data across multiple redis connections. If you're looking for a client for redis cluster see [redis-py-cluster](https://github.com/Grokzen/redis-py-cluster). 
 # Install

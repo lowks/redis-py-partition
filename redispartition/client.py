@@ -36,6 +36,10 @@ class RedisCluster(object):
         return conn.lrange(name, start, end)
 
     @pipeiflist
+    def llen(self, k, conn=None):
+        return conn.llen(k)
+
+    @pipeiflist
     def incr(self, *args, conn=None, **kwargs):
         return conn.incr(*args, **kwargs)
 
