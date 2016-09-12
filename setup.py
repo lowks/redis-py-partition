@@ -10,7 +10,7 @@ setup(
     ],
     license='MIT',
     url='http://github.com/phelimb/redis-py-partition',
-    description='.',
+    description='Simple partitioning of data across redis connections',
     author='Phelim Bradley',
     author_email='wave@phel.im',
     install_requires=[
